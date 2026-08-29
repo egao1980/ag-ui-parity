@@ -1,0 +1,13 @@
+[project]
+name = "ag-ui-parity-python-peers"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "ag-ui-protocol>=0.1.20",
+    "httpx>=0.28",
+    "starlette>=0.46",
+    "uvicorn>=0.34",
+]
+
+[tool.ruff]
+line-length = 120

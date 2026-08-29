@@ -1,0 +1,11 @@
+{
+  "name": "ag-ui-parity-node-peers",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@ag-ui/client": "^0.0.59",
+    "@ag-ui/core": "^0.0.59",
+    "@ag-ui/encoder": "^0.0.59",
+    "express": "^5.1.0"
+  }
+}

@@ -1,0 +1,15 @@
+*.fasl
+*.dx64fsl
+*.lx64fasl
+*.wx64fsl
+.qlot/
+.cl-repository/
+/tmp/
+*.log
+.DS_Store
+peers/node/node_modules/
+peers/node/package-lock.json
+peers/python/.venv/
+__pycache__/
+.ruff_cache/
+uv.lock
