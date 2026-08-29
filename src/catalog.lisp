@@ -191,6 +191,9 @@
                                    (or (ag-ui-protocol:identity-name id) "")))
               tr (ag-ui-protocol:transport-streaming-p tr)))))
 
+(defun %scenario-plist (name summary)
+  (list (intern (string-upcase name) :keyword) summary))
+
 (defun catalog-ok-p (report)
   (and (%capabilities-ok-p (getf report :capabilities))
        (every (lambda (name)

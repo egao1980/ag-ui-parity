@@ -14,8 +14,9 @@ SSE JSON  (interop surface)
   Node client  →  Lisp server    (@ag-ui/client HttpAgent)
   Python client → Lisp server    (official Event models + httpx; no HttpAgent in the Python SDK)
 
-WKT proto  (Lisp-only)
-  Lisp client  →  Lisp server    (serdes :wkt / google.protobuf.Value)
+WKT proto  (Lisp-only, in-process framed)
+  encode-ag-ui-framed → decode-ag-ui-framed   (serdes :wkt / google.protobuf.Value)
+  HTTP proto via Hunchentoot is skip — it writes Clack bodies as strings
 ```
 
 A pass is GET `AgentCapabilities` (`identity.name` contains `parity`, `transport.streaming`) plus six canned runs keyed by the last user message: `echo`, `tools`, `state`, `reasoning`, `interrupt`, `resume`.

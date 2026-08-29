@@ -8,6 +8,10 @@
                (:version "protobuf-backend-cl-protobufs" "0.2.0")
                "http-protocol"
                "http-backend-async"
+               "http-encoding-chipz"
+               "http-encoding-brotli"
+               "http-encoding-zstd"
+               "cl-stack-ssl"
                "event-protocol"
                "event-backend-libuv"
                "http-server-protocol"

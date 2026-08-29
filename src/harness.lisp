@@ -6,8 +6,6 @@
 
 (defun call-with-async-http (fn)
   "Bind http-backend-async × libuv so sync HTTP:POST awaits the loop."
-  (asdf:load-system "event-backend-libuv")
-  (asdf:load-system "http-backend-async")
   (let* ((eb (event-backend-libuv:make-libuv-backend))
          (el (event-protocol:make-event-loop eb))
          (hb (http-backend-async:make-async-backend))
@@ -70,31 +68,47 @@
   (call-with-async-http
    (lambda ()
      (let ((scenarios nil))
-       (dolist (name *scenarios*)
-         (setf scenarios
-               (list* (intern (string-upcase name) :keyword)
-                      (summarize-events (%run-scenario url name :format format))
-                      scenarios)))
+    (dolist (name *scenarios*)
+      (setf scenarios
+            (nconc scenarios
+                   (%scenario-plist name
+                                    (summarize-events
+                                     (%run-scenario url name :format format))))))
        (list :capabilities (%fetch-capabilities url)
-             :scenarios (nreverse scenarios))))))
+             :scenarios scenarios)))))
 
 (defun lisp-inprocess-talk ()
   (let* ((agent (make-parity-agent))
          (scenarios nil))
     (dolist (name *scenarios*)
       (setf scenarios
-            (list* (intern (string-upcase name) :keyword)
-                   (summarize-events
-                    (ag-ui-protocol:run-agent agent (%make-input name)))
-                   scenarios)))
+            (nconc scenarios
+                   (%scenario-plist name
+                                    (summarize-events
+                                     (ag-ui-protocol:run-agent agent (%make-input name)))))))
     (list :capabilities (ag-ui-protocol:get-capabilities agent)
-          :scenarios (nreverse scenarios))))
+          :scenarios scenarios)))
+
+(defun %materialize-clack-body (body)
+  "Hunchentoot will not write a Clack streaming function. Buffer it."
+  (cond
+    ((functionp body)
+     (list (with-output-to-string (s)
+             (funcall body s))))
+    (t body)))
+
+(defun make-parity-app ()
+  (let ((inner (ag-ui-protocol:make-ag-ui-app (make-parity-agent) :path "/")))
+    (lambda (env)
+      (destructuring-bind (status headers body)
+          (funcall inner env)
+        (list status headers (%materialize-clack-body body))))))
 
 (defun call-with-lisp-http-server (fn)
   (%ensure-http-server)
   (let* ((port (%free-port))
          (url (format nil "http://127.0.0.1:~a/" port))
-         (app (ag-ui-protocol:make-ag-ui-app (make-parity-agent) :path "/")))
+         (app (make-parity-app)))
     (http-server-protocol:with-server
         (s app :host "127.0.0.1" :port port)
       (sleep 0.15)
@@ -110,9 +124,26 @@
   (with-peer-http-server (url kind)
     (lisp-talk url)))
 
+(defun %frame-events (events)
+  (let ((out (make-array 0 :element-type '(unsigned-byte 8)
+                           :adjustable t :fill-pointer 0)))
+    (map nil (lambda (ev)
+               (loop for b across (ag-ui-protocol:encode-ag-ui-framed ev)
+                     do (vector-push-extend b out)))
+         events)
+    (coerce out '(simple-array (unsigned-byte 8) (*)))))
+
 (defun lisp-proto-lisp-server ()
-  (call-with-lisp-http-server
-   (lambda (url) (lisp-talk url :format :protobuf))))
+  "WKT framed round-trip. Hunchentoot will not write octet Clack bodies as binary."
+  (let* ((agent (make-parity-agent))
+         (scenarios nil))
+    (dolist (name *scenarios*)
+      (let* ((events (ag-ui-protocol:run-agent agent (%make-input name)))
+             (decoded (ag-ui-protocol:decode-ag-ui-framed (%frame-events events))))
+        (setf scenarios
+              (nconc scenarios (%scenario-plist name (summarize-events decoded))))))
+    (list :capabilities (ag-ui-protocol:get-capabilities agent)
+          :scenarios scenarios)))
 
 (defun parse-json-line (line)
   (when (and line (plusp (length (string-trim '(#\space) line))))
@@ -152,11 +183,9 @@
       (let ((sub (%js raw name)))
         (when sub
           (setf scenarios
-                (list* (intern (string-upcase name) :keyword)
-                       (%foreign-summary sub)
-                       scenarios)))))
+                (nconc scenarios (%scenario-plist name (%foreign-summary sub)))))))
     (list :capabilities (%foreign-capabilities rec)
-          :scenarios (nreverse scenarios))))
+          :scenarios scenarios)))
 
 (defun foreign-http-client-talk (kind url)
   (let ((cmd (http-client-command kind url)))

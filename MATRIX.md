@@ -26,12 +26,13 @@ JSON dump → `google.protobuf.Value` via serdes `:wkt`. **Not** the official Ev
 
 | Route | Lisp→Lisp | Lisp→Node | Lisp→Python | Node→Lisp | Python→Lisp |
 |-------|-----------|-----------|-------------|-----------|-------------|
-| framed events | have | skip | skip | skip | skip |
+| framed events | have (in-process) | skip | skip | skip | skip |
 
 ## skipped
 
 | Route | notes |
 |-------|-------|
 | official `@ag-ui/proto` Event oneof | different binary; SSE JSON is the interop path |
+| HTTP WKT proto via Hunchentoot | Clack octet bodies are written as strings |
 | TEXT_MESSAGE_CHUNK / TOOL_CALL_CHUNK expansion | covered in `ag-ui-protocol` unit tests |
 | capabilities negotiation | discovery only — GET is presence, not a handshake |
