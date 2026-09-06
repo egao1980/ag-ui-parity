@@ -1,9 +1,10 @@
 (defsystem "ag-ui-parity"
-  :version "0.1.0"
+  :version "0.2.0"
   :description "Interop canary: ag-ui-protocol vs official Node/Python AG-UI SDKs"
   :author "egao1980"
   :license "MIT"
-  :depends-on ((:version "ag-ui-protocol" "0.3.0")
+  :depends-on ((:version "ag-ui-protocol" "0.4.0")
+               "ag-ui-protocol/proto"
                (:version "ag-ui-backend-sse" "0.2.1")
                (:version "protobuf-backend-cl-protobufs" "0.2.0")
                "http-protocol"

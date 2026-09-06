@@ -4,6 +4,8 @@ Status: `have` · `partial` · `missing` · `skip`
 
 Catalog: GET capabilities + last-user-text scenarios (`echo` `tools` `state` `reasoning` `interrupt` `resume`).
 
+Official oneof catalog drops `tools` (TOOL_CALL_RESULT has no proto field) and `reasoning` (no proto field).
+
 ## SSE JSON
 
 | Route | Lisp→Lisp | Lisp→Node | Lisp→Python | Node→Lisp | Python→Lisp |
@@ -22,17 +24,26 @@ Python→Lisp uses official `ag_ui.core` Event models over httpx. The Python SDK
 
 ## WKT proto (`application/vnd.ag-ui.event+proto`)
 
-JSON dump → `google.protobuf.Value` via serdes `:wkt`. **Not** the official Event oneof.
+JSON dump → `google.protobuf.Value` via serdes `:wkt`. **Not** the official Event oneof. Lisp-only.
 
 | Route | Lisp→Lisp | Lisp→Node | Lisp→Python | Node→Lisp | Python→Lisp |
 |-------|-----------|-----------|-------------|-----------|-------------|
 | framed events | have (in-process) | skip | skip | skip | skip |
 
+## Official Event oneof (`application/vnd.ag-ui.event+oneof`)
+
+`encode-ag-ui-event-oneof` ↔ `@ag-ui/proto` encode/decode. Distinct media type so WKT keeps `+proto`.
+
+| Route | Lisp→Lisp | Lisp→Node | Lisp→Python | Node→Lisp | Python→Lisp |
+|-------|-----------|-----------|-------------|-----------|-------------|
+| echo / state / interrupt / resume | have (in-process + HTTP) | have (bytes) | skip | have (bytes) | skip |
+
 ## skipped
 
 | Route | notes |
 |-------|-------|
-| official `@ag-ui/proto` Event oneof | different binary; SSE JSON is the interop path |
-| HTTP WKT proto via Hunchentoot | Clack octet bodies are written as strings |
+| official oneof on `application/vnd.ag-ui.event+proto` | that type already means WKT here; oneof is `+oneof` |
+| WKT Lisp↔Node/Python | different binary from `@ag-ui/proto` |
+| TOOL_CALL_RESULT / REASONING_* / ACTIVITY_* / THINKING_* oneof | absent from official `Event` (21 fields) |
 | TEXT_MESSAGE_CHUNK / TOOL_CALL_CHUNK expansion | covered in `ag-ui-protocol` unit tests |
 | capabilities negotiation | discovery only — GET is presence, not a handshake |

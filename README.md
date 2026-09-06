@@ -14,14 +14,18 @@ SSE JSON  (interop surface)
   Node client  →  Lisp server    (@ag-ui/client HttpAgent)
   Python client → Lisp server    (official Event models + httpx; no HttpAgent in the Python SDK)
 
-WKT proto  (Lisp-only, in-process framed)
+WKT proto  (Lisp-only)
+  application/vnd.ag-ui.event+proto
   encode-ag-ui-framed → decode-ag-ui-framed   (serdes :wkt / google.protobuf.Value)
-  HTTP proto via Hunchentoot is skip — it writes Clack bodies as strings
+
+Official Event oneof  (Lisp↔Node @ag-ui/proto)
+  application/vnd.ag-ui.event+oneof
+  encode-ag-ui-event-oneof ↔ @ag-ui/proto encode/decode
 ```
 
 A pass is GET `AgentCapabilities` (`identity.name` contains `parity`, `transport.streaming`) plus six canned runs keyed by the last user message: `echo`, `tools`, `state`, `reasoning`, `interrupt`, `resume`.
 
-Official `@ag-ui/proto` **Event oneof** binary is **not** in scope — our `application/vnd.ag-ui.event+proto` is JSON-as-WKT, not wire-compatible.
+Official oneof catalog is `echo` `state` `interrupt` `resume` — `tools` carries `TOOL_CALL_RESULT` and `reasoning` has no proto field.
 
 ## Run
 
