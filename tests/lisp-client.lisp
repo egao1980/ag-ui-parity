@@ -9,6 +9,17 @@
 (deftest lisp-client-lisp-wkt-proto
   (ok (catalog-ok-p (lisp-proto-lisp-server))))
 
+(deftest lisp-client-lisp-oneof-proto
+  (ok (oneof-catalog-ok-p (lisp-oneof-lisp-server))))
+
+(deftest lisp-client-lisp-http-oneof
+  (ok (oneof-catalog-ok-p (lisp-http-oneof-lisp-server))))
+
+(deftest lisp-client-node-oneof-proto
+  (if (http-peer-available-p :node)
+      (ok (oneof-catalog-ok-p (lisp-oneof-node-roundtrip)))
+      (skip "node HTTP peer not available")))
+
 (deftest lisp-client-node-http-server
   (if (http-peer-available-p :node)
       (ok (catalog-ok-p (lisp-http-peer-server :node)))

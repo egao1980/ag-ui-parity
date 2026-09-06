@@ -11,6 +11,11 @@
            #:lisp-http-lisp-server
            #:lisp-http-peer-server
            #:lisp-proto-lisp-server
+           #:lisp-oneof-lisp-server
+           #:lisp-http-oneof-lisp-server
+           #:lisp-oneof-node-roundtrip
+           #:oneof-catalog-ok-p
+           #:*oneof-scenarios*
            #:foreign-http-client-talk
            #:call-with-lisp-http-server
            #:call-with-async-http

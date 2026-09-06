@@ -3,6 +3,10 @@
 (defparameter *scenarios* '("echo" "tools" "state" "reasoning" "interrupt" "resume")
   "User-message keys that select a canned event sequence.")
 
+(defparameter *oneof-scenarios* '("echo" "state" "interrupt" "resume")
+  "Scenarios whose events all have official Event oneof fields.
+   tools includes TOOL_CALL_RESULT; reasoning has no proto field.")
+
 (defun %thread (input)
   (or (ag-ui-protocol:run-agent-input-thread-id input) "thread"))
 
@@ -194,9 +198,12 @@
 (defun %scenario-plist (name summary)
   (list (intern (string-upcase name) :keyword) summary))
 
-(defun catalog-ok-p (report)
+(defun catalog-ok-p (report &optional (names *scenarios*))
   (and (%capabilities-ok-p (getf report :capabilities))
        (every (lambda (name)
                 (scenario-ok-p name (getf (getf report :scenarios)
                                           (intern (string-upcase name) :keyword))))
-              *scenarios*)))
+              names)))
+
+(defun oneof-catalog-ok-p (report)
+  (catalog-ok-p report *oneof-scenarios*))
