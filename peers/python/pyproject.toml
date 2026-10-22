@@ -3,7 +3,7 @@ name = "ag-ui-parity-python-peers"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "ag-ui-protocol>=0.1.20",
+    "ag-ui-protocol>=0.1.20,<1",
     "httpx>=0.28",
     "starlette>=0.46",
     "uvicorn>=0.34",
